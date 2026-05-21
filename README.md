@@ -40,7 +40,7 @@ Edite `.env` y defina al menos:
 ## Autenticación y autorización (Google + lista blanca)
 
 - **Público:** `/`, `/login`, `/unauthorized`, y rutas de Auth.js bajo `/api/auth/*`.  
-- **Miembro autorizado** (`AllowedUser` con `isActive = true`): puede usar `/registro`, `/directorio`, `/dashboard` y `GET/POST /api/members`.  
+- **Miembro autorizado** (`AllowedUser` con `isActive = true`): puede usar `/mi-perfil`, `/registro`, `/directorio`, `/dashboard` y `GET/POST /api/members`, `GET/PUT /api/me/member`.  
 - **Administrador** (`role = admin` además de activo): incluye `/admin` y las APIs bajo `/api/admin/*` (gestión de accesos y exportación de registros).  
 - Sin sesión, el middleware redirige a **`/login`** con `callbackUrl`. Con sesión Google pero **sin** fila activa en `AllowedUser`, el flujo de inicio de sesión redirige a **`/unauthorized`** (no se completa el acceso al área privada).  
 - Las APIs vuelven a comprobar el estado en base de datos (no solo el JWT ni el cliente).
@@ -58,11 +58,12 @@ Opcional: restrinja el acceso en la pantalla de consentimiento a usuarios de su 
 
 1. **Inicio** (`/`): público; hero y CTAs (al pulsar área privada sin sesión → `/login` y retorno con `callbackUrl`).  
 2. **Login** (`/login`): “Continuar con Google”; si el correo no está en `AllowedUser` activo → `/unauthorized`. Si está autorizado, redirección a `callbackUrl` o `/directorio`.  
-3. **Registro** (`/registro`): requiere miembro autorizado; validación en cliente; `POST /api/members` con cookie de sesión.  
-4. **Directorio** (`/directorio`): requiere miembro autorizado; datos desde Prisma en el servidor; filtros en cliente.  
-5. **Dashboard** (`/dashboard`): requiere miembro autorizado; métricas desde la base.  
-6. **Admin** (`/admin`): requiere **rol admin** en `AllowedUser`; gestión de usuarios autorizados y tabla de registros.  
-7. **Cerrar sesión:** botón en el encabezado (desktop y móvil) → vuelve a `/`.
+3. **Registro** (`/registro`): requiere miembro autorizado; si ya existe perfil con su correo, mensaje y enlace a **Mi perfil**; `POST /api/members` para registrar otros (correo único).  
+4. **Mi perfil** (`/mi-perfil`): crear o editar el propio perfil; `GET/PUT /api/me/member` (correo solo desde sesión).  
+5. **Directorio** (`/directorio`): requiere miembro autorizado; datos desde Prisma; filtros en cliente.  
+6. **Dashboard** (`/dashboard`): requiere miembro autorizado; métricas desde la base.  
+7. **Admin** (`/admin`): rol **admin**; usuarios autorizados, tabla de miembros con estado de acceso y desactivar/reactivar ingreso.  
+8. **Cerrar sesión:** botón en el encabezado → vuelve a `/`.
 
 ## Base de datos
 
@@ -166,7 +167,8 @@ El script `build` ejecuta `prisma generate` antes de `next build` para que el cl
 | `/`               | Landing institucional (**pública**). |
 | `/login`          | Acceso con Google; redirige con `callbackUrl` si aplica. |
 | `/unauthorized`   | Correo sin acceso habilitado (público). |
-| `/registro`       | Formulario (**miembro autorizado**). |
+| `/registro`       | Formulario de alta (**miembro**); si ya tiene perfil propio, enlace a Mi perfil. |
+| `/mi-perfil`      | Crear o editar el propio perfil `Member` (correo desde sesión). |
 | `/directorio`     | Cards filtrables (**miembro autorizado**). |
 | `/dashboard`      | Métricas (**miembro autorizado**). |
 | `/admin`          | Gestión de accesos y registros sensibles (**admin**). |
@@ -177,7 +179,9 @@ El script `build` ejecuta `prisma generate` antes de `next build` para que el cl
 |----------------------------------|-----|
 | `GET/POST …/api/auth/*`         | Auth.js (OAuth Google, sesión, cierre de sesión). |
 | `GET /api/members`               | Lista (**miembro autorizado**). |
-| `POST /api/members`             | Crea un miembro (**miembro autorizado**). |
+| `POST /api/members`             | Crea un miembro (**miembro autorizado**); correo único. |
+| `GET /api/me/member`           | Perfil `Member` del usuario autenticado o `null`. |
+| `PUT /api/me/member`           | Crea o actualiza solo el perfil del usuario (correo desde sesión). |
 | `GET /api/admin/members`        | Lista completa de registros (**admin**). |
 | `GET/POST/PATCH/DELETE …/api/admin/allowed-users` | CRUD de correos autorizados (**admin**). |
 

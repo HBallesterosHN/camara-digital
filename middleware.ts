@@ -18,8 +18,13 @@ function isMemberPage(pathname: string): boolean {
   return (
     pathname.startsWith("/registro") ||
     pathname.startsWith("/directorio") ||
-    pathname.startsWith("/dashboard")
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/mi-perfil")
   );
+}
+
+function isMeApi(pathname: string): boolean {
+  return pathname.startsWith("/api/me/");
 }
 
 function isAdminPage(pathname: string): boolean {
@@ -52,7 +57,11 @@ export async function middleware(req: NextRequest) {
   }
 
   const needsCommittee =
-    isMemberPage(pathname) || isMembersApi(pathname) || isAdminPage(pathname) || isAdminApi(pathname);
+    isMemberPage(pathname) ||
+    isMembersApi(pathname) ||
+    isMeApi(pathname) ||
+    isAdminPage(pathname) ||
+    isAdminApi(pathname);
 
   if (!needsCommittee) {
     return NextResponse.next();
@@ -71,7 +80,7 @@ export async function middleware(req: NextRequest) {
     secureCookie: secureCookieFromRequest(req),
   });
 
-  if (isMembersApi(pathname)) {
+  if (isMembersApi(pathname) || isMeApi(pathname)) {
     if (!token?.email) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }

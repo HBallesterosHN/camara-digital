@@ -4,6 +4,7 @@ import { auth, signOut } from "@/auth";
 import { BrandMark } from "@/components/brand-mark";
 
 const memberNav = [
+  { href: "/mi-perfil", label: "Mi perfil" },
   { href: "/registro", label: "Registro" },
   { href: "/directorio", label: "Directorio" },
   { href: "/dashboard", label: "Dashboard" },

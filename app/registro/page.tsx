@@ -2,13 +2,21 @@ import type { Metadata } from "next";
 
 import { RegistrationForm } from "@/components/registration-form";
 import { assertActiveCommitteeMember } from "@/lib/assert-committee-page";
+import { normalizeCommitteeEmail } from "@/lib/committee-access";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Registro de perfil",
 };
 
 export default async function RegistroPage() {
-  await assertActiveCommitteeMember("/registro");
+  const { session } = await assertActiveCommitteeMember("/registro");
+  const email = normalizeCommitteeEmail(session.user?.email ?? null);
+  let hasExistingProfile = false;
+  if (email) {
+    const existing = await prisma.member.findUnique({ where: { email } });
+    hasExistingProfile = !!existing;
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
@@ -27,7 +35,7 @@ export default async function RegistroPage() {
           consentimiento al final del formulario.
         </p>
       </div>
-      <RegistrationForm />
+      <RegistrationForm hasExistingProfile={hasExistingProfile} />
     </div>
   );
 }

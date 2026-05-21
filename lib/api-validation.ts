@@ -1,10 +1,16 @@
 import { CONTRIBUTION_TYPES, EXPERTISE_AREAS, HONDURAS_DEPARTMENTS } from "@/lib/constants";
+import { normalizeCommitteeEmail } from "@/lib/committee-access";
 import { isCompleteHnWhatsapp, normalizeHnWhatsappForStorage } from "@/lib/hn-whatsapp";
 import { isMunicipalityInDepartment } from "@/lib/honduras-municipalities";
 
 const ALLOWED_DEPARTMENTS = new Set<string>(HONDURAS_DEPARTMENTS as unknown as string[]);
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export type ValidateMemberBodyOptions = {
+  /** Correo tomado solo de la sesión; el cuerpo no puede redefinir el propietario del perfil. */
+  emailFromSession?: string | null;
+};
 
 export type CreateMemberBody = {
   fullName: string;
@@ -24,7 +30,10 @@ export type CreateMemberBody = {
   consent: boolean;
 };
 
-export function validateCreateMemberBody(raw: unknown): { ok: true; data: CreateMemberBody } | { ok: false; error: string } {
+export function validateCreateMemberBody(
+  raw: unknown,
+  options?: ValidateMemberBodyOptions,
+): { ok: true; data: CreateMemberBody } | { ok: false; error: string } {
   if (!raw || typeof raw !== "object") {
     return { ok: false, error: "Cuerpo inválido" };
   }
@@ -34,7 +43,10 @@ export function validateCreateMemberBody(raw: unknown): { ok: true; data: Create
   const fullName = typeof b.fullName === "string" ? b.fullName.trim() : "";
   const company = typeof b.company === "string" ? b.company.trim() : "";
   const position = typeof b.position === "string" ? b.position.trim() : "";
-  const email = typeof b.email === "string" ? b.email.trim().toLowerCase() : "";
+  const sessionEmail = normalizeCommitteeEmail(
+    typeof options?.emailFromSession === "string" ? options.emailFromSession : null,
+  );
+  const email = sessionEmail ?? (typeof b.email === "string" ? b.email.trim().toLowerCase() : "");
   const whatsapp = typeof b.whatsapp === "string" ? b.whatsapp.trim() : "";
   const department = typeof b.department === "string" ? b.department.trim() : "";
   const municipality = typeof b.municipality === "string" ? b.municipality.trim() : "";

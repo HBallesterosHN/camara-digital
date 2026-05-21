@@ -38,6 +38,7 @@ model Member {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
+  @@unique([email])
   @@index([department])
   @@index([createdAt])
 }

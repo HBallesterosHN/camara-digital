@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
+import { normalizeCommitteeEmail } from "@/lib/committee-access";
 import { prisma } from "@/lib/prisma";
 import { requireCommitteeAdmin } from "@/lib/require-committee";
+
+type AdminMemberAccessStatus = "active" | "inactive" | "none";
 
 export async function GET() {
   const r = await requireCommitteeAdmin();
@@ -31,8 +34,39 @@ export async function GET() {
         updatedAt: true,
       },
     });
+
+    const emails = [
+      ...new Set(
+        members.map((m) => normalizeCommitteeEmail(m.email)).filter((x): x is string => Boolean(x)),
+      ),
+    ];
+
+    const allowedUsers =
+      emails.length > 0
+        ? await prisma.allowedUser.findMany({
+            where: { email: { in: emails } },
+            select: { id: true, email: true, isActive: true },
+          })
+        : [];
+
+    const byEmail = new Map(allowedUsers.map((u) => [u.email.toLowerCase(), u]));
+
+    const enriched = members.map((m) => {
+      const norm = normalizeCommitteeEmail(m.email);
+      const au = norm ? byEmail.get(norm) : undefined;
+      let accessStatus: AdminMemberAccessStatus = "none";
+      if (au) {
+        accessStatus = au.isActive ? "active" : "inactive";
+      }
+      return {
+        ...m,
+        accessStatus,
+        allowedUserId: au?.id ?? null,
+      };
+    });
+
     return NextResponse.json(
-      { members },
+      { members: enriched },
       {
         headers: {
           "Cache-Control": "private, no-store, max-age=0",

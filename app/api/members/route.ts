@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { validateCreateMemberBody } from "@/lib/api-validation";
+import { normalizeCommitteeEmail } from "@/lib/committee-access";
 import { prisma } from "@/lib/prisma";
 import { toPublicMember } from "@/lib/member-mapper";
 import { requireCommitteeMember } from "@/lib/require-committee";
@@ -43,6 +44,21 @@ export async function POST(request: Request) {
   }
 
   const d = parsed.data;
+  const emailKey = normalizeCommitteeEmail(d.email);
+  if (!emailKey) {
+    return NextResponse.json({ error: "Correo inválido" }, { status: 400 });
+  }
+
+  const existing = await prisma.member.findUnique({ where: { email: emailKey } });
+  if (existing) {
+    return NextResponse.json(
+      {
+        error:
+          "Ya existe un perfil con este correo. Si es su cuenta, actualícelo desde Mi perfil; si registra a otra persona, use un correo distinto.",
+      },
+      { status: 409 },
+    );
+  }
 
   try {
     const member = await prisma.member.create({
@@ -50,7 +66,7 @@ export async function POST(request: Request) {
         fullName: d.fullName,
         company: d.company,
         position: d.position,
-        email: d.email,
+        email: emailKey,
         whatsapp: d.whatsapp,
         department: d.department,
         municipality: d.municipality,
@@ -74,7 +90,17 @@ export async function POST(request: Request) {
         },
       },
     );
-  } catch {
+  } catch (e: unknown) {
+    const code = typeof e === "object" && e !== null && "code" in e ? (e as { code?: string }).code : undefined;
+    if (code === "P2002") {
+      return NextResponse.json(
+        {
+          error:
+            "Ya existe un perfil con este correo. Use Mi perfil para actualizar el suyo o indique otro correo.",
+        },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({ error: "No se pudo guardar el registro. Intente de nuevo." }, { status: 500 });
   }
 }
