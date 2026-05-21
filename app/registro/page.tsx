@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 
 import { RegistrationForm } from "@/components/registration-form";
+import { assertActiveCommitteeMember } from "@/lib/assert-committee-page";
 
 export const metadata: Metadata = {
   title: "Registro de perfil",
 };
 
-export default function RegistroPage() {
+export default async function RegistroPage() {
+  await assertActiveCommitteeMember("/registro");
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
       <div className="mb-10">

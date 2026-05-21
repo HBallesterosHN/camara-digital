@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { AuthProvider } from "@/components/auth-provider";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { Toaster } from "sonner";
 
 import "./globals.css";
 
@@ -36,6 +37,7 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <AuthProvider session={session}>
+          <Toaster richColors position="top-center" theme="dark" closeButton />
           <div className="flex min-h-full flex-col">
             <SiteHeader />
             <main className="min-h-0 min-w-0 flex-1">{children}</main>

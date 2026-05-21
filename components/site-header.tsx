@@ -3,11 +3,10 @@ import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import { BrandMark } from "@/components/brand-mark";
 
-const privateNav = [
+const memberNav = [
   { href: "/registro", label: "Registro" },
   { href: "/directorio", label: "Directorio" },
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/admin", label: "Admin" },
 ];
 
 const linkClass =
@@ -16,6 +15,13 @@ const linkClass =
 export async function SiteHeader() {
   const session = await auth();
   const user = session?.user;
+  const authorized = user?.committeeAuthorized === true;
+  const isAdmin = user?.committeeRole === "admin";
+
+  const badgeLabel = isAdmin ? "Admin" : "Miembro autorizado";
+  const badgeClass = isAdmin
+    ? "border-violet-400/40 bg-violet-500/15 text-violet-100"
+    : "border-cyan-400/35 bg-cyan-500/10 text-cyan-100";
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-[var(--ccd-surface)]/92 backdrop-blur-md">
@@ -33,14 +39,23 @@ export async function SiteHeader() {
               <Link href="/" className={linkClass}>
                 Inicio
               </Link>
-              {user ? (
+              {authorized ? (
                 <>
-                  {privateNav.map((item) => (
+                  {memberNav.map((item) => (
                     <Link key={item.href} href={item.href} className={linkClass}>
                       {item.label}
                     </Link>
                   ))}
+                  {isAdmin ? (
+                    <Link href="/admin" className={linkClass}>
+                      Admin
+                    </Link>
+                  ) : null}
                 </>
+              ) : user ? (
+                <span className="shrink-0 rounded-lg px-2.5 py-2 text-xs text-amber-200/90 sm:text-sm">
+                  Sesión sin acceso al comité
+                </span>
               ) : (
                 <Link
                   href="/login"
@@ -53,10 +68,17 @@ export async function SiteHeader() {
           </nav>
           {user ? (
             <div className="hidden shrink-0 items-center gap-2 border-l border-white/10 pl-3 sm:flex">
-              <div className="max-w-[10rem] truncate text-right text-[11px] leading-tight text-slate-400">
+              <div className="max-w-[11rem] truncate text-right text-[11px] leading-tight text-slate-400">
                 {user.name && <span className="block truncate font-medium text-slate-200">{user.name}</span>}
                 {user.email && <span className="block truncate">{user.email}</span>}
               </div>
+              {authorized ? (
+                <span
+                  className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide sm:text-[11px] ${badgeClass}`}
+                >
+                  {badgeLabel}
+                </span>
+              ) : null}
               <form
                 action={async () => {
                   "use server";
@@ -76,11 +98,18 @@ export async function SiteHeader() {
       </div>
       {user ? (
         <div className="border-t border-white/5 bg-black/20 px-4 py-2 sm:hidden">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-2">
-            <p className="min-w-0 flex-1 truncate text-xs text-slate-400">
-              <span className="font-medium text-slate-300">{user.name ?? "Sesión"}</span>
-              {user.email ? <span className="block truncate text-slate-500">{user.email}</span> : null}
-            </p>
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs text-slate-400">
+                <span className="font-medium text-slate-300">{user.name ?? "Sesión"}</span>
+                {user.email ? <span className="block truncate text-slate-500">{user.email}</span> : null}
+              </p>
+              {authorized ? (
+                <span className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${badgeClass}`}>
+                  {badgeLabel}
+                </span>
+              ) : null}
+            </div>
             <form
               action={async () => {
                 "use server";

@@ -3,8 +3,12 @@ import { NextResponse } from "next/server";
 import { validateCreateMemberBody } from "@/lib/api-validation";
 import { prisma } from "@/lib/prisma";
 import { toPublicMember } from "@/lib/member-mapper";
+import { requireCommitteeMember } from "@/lib/require-committee";
 
 export async function GET() {
+  const r = await requireCommitteeMember();
+  if (!r.ok) return r.response;
+
   try {
     const members = await prisma.member.findMany({
       orderBy: { createdAt: "desc" },
@@ -23,6 +27,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const r = await requireCommitteeMember();
+  if (!r.ok) return r.response;
+
   let json: unknown;
   try {
     json = await request.json();

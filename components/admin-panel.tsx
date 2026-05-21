@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { startTransition, useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
-import { ADMIN_PIN_STORAGE_KEY } from "@/lib/admin-storage";
+import { AdminAllowedUsers } from "@/components/admin-allowed-users";
 import { adminMembersToCsvRows, membersToCsv } from "@/lib/csv-export";
 
 type AdminMember = {
@@ -34,36 +35,24 @@ function formatDate(iso: string) {
   }
 }
 
-export function AdminPanel() {
-  const [pinInput, setPinInput] = useState("");
-  const [storedPin, setStoredPin] = useState<string | null>(() => {
-    const raw = window.localStorage.getItem(ADMIN_PIN_STORAGE_KEY);
-    const t = raw?.trim();
-    return t ? t : null;
-  });
+function MembersSection() {
   const [members, setMembers] = useState<AdminMember[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<AdminMember | null>(null);
   const [exportState, setExportState] = useState<"idle" | "done">("idle");
 
-  const loadMembers = useCallback(async (pin: string) => {
-    const cleanPin = pin.trim();
-    if (!cleanPin) {
-      setMembers(null);
-      return;
-    }
+  const loadMembers = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/members", { headers: { "x-admin-pin": cleanPin } });
+      const res = await fetch("/api/admin/members");
       const data = (await res.json()) as { members?: AdminMember[]; error?: string };
       if (!res.ok) {
         setError(data.error ?? "No autorizado");
         setMembers(null);
-        if (res.status === 401 && typeof window !== "undefined") {
-          window.localStorage.removeItem(ADMIN_PIN_STORAGE_KEY);
-          setStoredPin(null);
+        if (res.status === 401 || res.status === 403) {
+          toast.error(data.error ?? "No tiene permisos para ver los registros.");
         }
         return;
       }
@@ -71,19 +60,17 @@ export function AdminPanel() {
     } catch {
       setError("No se pudo cargar la lista.");
       setMembers(null);
+      toast.error("Error de red al cargar miembros.");
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Carga y re-carga cuando cambia el PIN almacenado (login o logout).
   useEffect(() => {
-    if (!storedPin) {
-      setMembers(null);
-      return;
-    }
-    void loadMembers(storedPin);
-  }, [storedPin, loadMembers]);
+    startTransition(() => {
+      void loadMembers();
+    });
+  }, [loadMembers]);
 
   useEffect(() => {
     if (!detail) return;
@@ -93,36 +80,6 @@ export function AdminPanel() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [detail]);
-
-  async function handleVerify(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    try {
-      const res = await fetch("/api/admin/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: pinInput.trim() }),
-      });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
-      if (!res.ok || !data.ok) {
-        setError(data.error ?? "PIN incorrecto");
-        return;
-      }
-      const clean = pinInput.trim();
-      window.localStorage.setItem(ADMIN_PIN_STORAGE_KEY, clean);
-      setStoredPin(clean);
-      setPinInput("");
-    } catch {
-      setError("No se pudo verificar el PIN.");
-    }
-  }
-
-  function logout() {
-    window.localStorage.removeItem(ADMIN_PIN_STORAGE_KEY);
-    setStoredPin(null);
-    setMembers(null);
-    setDetail(null);
-  }
 
   function exportCsv() {
     if (!members || members.length === 0) return;
@@ -138,63 +95,25 @@ export function AdminPanel() {
     a.remove();
     URL.revokeObjectURL(url);
     setExportState("done");
+    toast.success("Archivo CSV generado.");
     window.setTimeout(() => setExportState("idle"), 2500);
   }
 
-  if (!storedPin) {
-    return (
-      <div className="mx-auto max-w-md rounded-2xl border border-white/10 bg-white/[0.04] p-8 shadow-xl">
-        <h2 className="text-xl font-semibold text-white">Acceso administrativo</h2>
-        <p className="mt-2 text-sm text-slate-400">
-          Ingrese el PIN configurado en la variable de entorno <code className="rounded bg-black/30 px-1">ADMIN_PIN</code>{" "}
-          del servidor.
-        </p>
-        <form onSubmit={handleVerify} className="mt-6 space-y-4">
-          <label className="block text-sm">
-            <span className="font-medium text-slate-200">PIN</span>
-            <input
-              type="password"
-              autoComplete="current-password"
-              value={pinInput}
-              onChange={(e) => setPinInput(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-white/10 bg-[#071229] px-3 py-2.5 text-slate-100 outline-none ring-cyan-400/30 focus:ring-2"
-            />
-          </label>
-          {error && <p className="text-sm text-red-300">{error}</p>}
-          <button
-            type="submit"
-            className="w-full rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20"
-          >
-            Ingresar
-          </button>
-        </form>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
+    <section className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-400">
-          Sesión activa. El PIN se guarda solo en este navegador (<span className="text-slate-200">localStorage</span>).
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={exportCsv}
-            disabled={!members || members.length === 0}
-            className="rounded-lg border border-cyan-500/35 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {exportState === "done" ? "Archivo generado" : "Exportar CSV"}
-          </button>
-          <button
-            type="button"
-            onClick={logout}
-            className="rounded-lg border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 active:scale-[0.98]"
-          >
-            Cerrar sesión
-          </button>
+        <div>
+          <h2 className="text-xl font-semibold text-white">Registros del comité</h2>
+          <p className="mt-1 text-sm text-slate-400">Altas completas desde el formulario de registro (datos sensibles).</p>
         </div>
+        <button
+          type="button"
+          onClick={exportCsv}
+          disabled={!members || members.length === 0}
+          className="rounded-lg border border-cyan-500/35 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {exportState === "done" ? "Archivo generado" : "Exportar CSV"}
+        </button>
       </div>
 
       {loading && (
@@ -209,7 +128,7 @@ export function AdminPanel() {
         </div>
       )}
 
-      {members && !loading && members.length === 0 && (
+      {!loading && members && members.length === 0 && (
         <div className="rounded-2xl border border-dashed border-white/15 bg-[#071229]/50 px-6 py-12 text-center">
           <p className="text-sm font-medium text-slate-200">No hay registros en la base de datos</p>
           <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
@@ -218,7 +137,7 @@ export function AdminPanel() {
         </div>
       )}
 
-      {members && !loading && members.length > 0 && (
+      {!loading && members && members.length > 0 && (
         <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.03] shadow-inner">
           <table className="min-w-full text-left text-sm text-slate-200">
             <thead className="border-b border-white/10 bg-[#071229] text-xs uppercase tracking-wide text-slate-400">
@@ -342,6 +261,17 @@ export function AdminPanel() {
           </div>
         </div>
       )}
+    </section>
+  );
+}
+
+export function AdminPanel() {
+  return (
+    <div className="space-y-16">
+      <AdminAllowedUsers />
+      <div className="border-t border-white/10 pt-12">
+        <MembersSection />
+      </div>
     </div>
   );
 }

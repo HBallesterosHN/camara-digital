@@ -8,6 +8,17 @@ const prisma = new PrismaClient(
 );
 
 async function main() {
+  await prisma.allowedUser.upsert({
+    where: { email: "hordhn@gmail.com" },
+    create: {
+      email: "hordhn@gmail.com",
+      fullName: "Administrador inicial",
+      role: "admin",
+      isActive: true,
+    },
+    update: { role: "admin", isActive: true },
+  });
+
   await prisma.member.deleteMany();
 
   const membersData = [

@@ -1,20 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { isAdminPinConfigured, isValidAdminPin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import { requireCommitteeAdmin } from "@/lib/require-committee";
 
-export async function GET(request: Request) {
-  if (!isAdminPinConfigured()) {
-    return NextResponse.json(
-      { error: "El servidor no tiene configurado ADMIN_PIN. Revise las variables de entorno." },
-      { status: 503 },
-    );
-  }
-
-  const pin = request.headers.get("x-admin-pin");
-  if (!isValidAdminPin(pin)) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
+export async function GET() {
+  const r = await requireCommitteeAdmin();
+  if (!r.ok) return r.response;
 
   try {
     const members = await prisma.member.findMany({

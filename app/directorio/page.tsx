@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { DatabaseUnavailable } from "@/components/database-unavailable";
 import { DirectoryClient } from "@/components/directory-client";
+import { assertActiveCommitteeMember } from "@/lib/assert-committee-page";
 import { sortMembersForDirectoryDisplay } from "@/lib/member-directory-sort";
 import { toPublicMember } from "@/lib/member-mapper";
 import { isPrismaDbUnreachable } from "@/lib/prisma-db-error";
@@ -14,6 +15,8 @@ export const metadata: Metadata = {
 };
 
 export default async function DirectorioPage() {
+  await assertActiveCommitteeMember("/directorio");
+
   let membersRaw;
   try {
     membersRaw = await prisma.member.findMany({

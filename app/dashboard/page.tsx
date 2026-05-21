@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { DatabaseUnavailable } from "@/components/database-unavailable";
 import { DashboardView } from "@/components/dashboard-view";
+import { assertActiveCommitteeMember } from "@/lib/assert-committee-page";
 import { getDashboardStats } from "@/lib/dashboard-stats";
 import { isPrismaDbUnreachable } from "@/lib/prisma-db-error";
 
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
+  await assertActiveCommitteeMember("/dashboard");
+
   let stats;
   try {
     stats = await getDashboardStats();
