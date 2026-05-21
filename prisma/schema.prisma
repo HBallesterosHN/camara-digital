@@ -1,0 +1,33 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Member {
+  id                    String   @id @default(cuid())
+  fullName              String
+  company               String
+  position              String
+  email                 String
+  whatsapp              String
+  department            String
+  municipality          String
+  linkedin              String?
+  website               String?
+  expertiseAreas        String[]
+  contributionTypes     String[]
+  professionalSummary   String   @db.Text
+  committeeContribution String   @db.Text
+  committeeExpectation  String   @db.Text
+  consent               Boolean
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([department])
+  @@index([createdAt])
+}
