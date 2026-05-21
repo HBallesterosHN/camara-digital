@@ -90,6 +90,21 @@ Poblar datos de demostración (8 miembros ficticios, incluido el perfil de Héct
 npm run db:seed
 ```
 
+**Orden recomendado:** primero esquema en la base (`db:migrate` / `migrate deploy` o `db:push`), **después** el seed. Si el seed falla con *«The table … AllowedUser does not exist»* (P2021), aún no se aplicó la migración que crea esa tabla.
+
+### Si `migrate deploy` devuelve P3005 (esquema no vacío)
+
+Suele pasar cuando la base ya tenía tablas (p. ej. creadas con `db push`) y Prisma no puede aplicar la primera migración sobre una base “no vacía”.
+
+- **Opción rápida (Neon / dev):** sincronizar el esquema actual y luego seed:
+
+  ```bash
+  npx prisma db push
+  npm run db:seed
+  ```
+
+- **Opción con historial de migraciones:** *baselining* — marcar como ya aplicada la migración inicial que corresponde a lo que ya hay en la base, y luego `npx prisma migrate deploy`. Véase [Baselining](https://www.prisma.io/docs/guides/migrate/developing-with-prisma-migrate/baselining).
+
 Explorar datos con Prisma Studio:
 
 ```bash

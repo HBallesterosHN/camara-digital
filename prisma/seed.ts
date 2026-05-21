@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 import { getPrismaDatasourceOverrideUrl } from "../lib/prisma-runtime-url";
 
@@ -8,16 +8,39 @@ const prisma = new PrismaClient(
 );
 
 async function main() {
-  await prisma.allowedUser.upsert({
-    where: { email: "hordhn@gmail.com" },
-    create: {
-      email: "hordhn@gmail.com",
-      fullName: "Administrador inicial",
-      role: "admin",
-      isActive: true,
-    },
-    update: { role: "admin", isActive: true },
-  });
+  try {
+    await prisma.allowedUser.upsert({
+      where: { email: "hordhn@gmail.com" },
+      create: {
+        email: "hordhn@gmail.com",
+        fullName: "Administrador inicial",
+        role: "admin",
+        isActive: true,
+      },
+      update: { role: "admin", isActive: true },
+    });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2021") {
+      console.error(`
+[seed] La tabla "AllowedUser" no existe en la base de datos.
+
+  1) Sincronice el esquema (rápido en Neon / desarrollo):
+       npx prisma db push
+
+     Luego:
+       npm run db:seed
+
+  2) Si usa solo migraciones y ve P3005 al hacer "migrate deploy" (base ya
+     tenía tablas sin historial de Prisma), marque la migración inicial como
+     aplicada y despliegue el resto:
+       npx prisma migrate resolve --applied "20260120120000_init"
+       npx prisma migrate deploy
+
+     Guía: https://www.prisma.io/docs/guides/migrate/developing-with-prisma-migrate/baselining
+`);
+    }
+    throw e;
+  }
 
   await prisma.member.deleteMany();
 
