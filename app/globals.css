@@ -1,11 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050c18;
+  --ccd-bg: #070b14;
+  --ccd-surface: #0f172a;
+  --ccd-navy: #1e3a8a;
+  --ccd-violet: #5b21b6;
+  --ccd-orange: #ea580c;
   --foreground: #e2e8f0;
-  --brand-deep: #071229;
-  --brand-cyan: #22d3ee;
-  --brand-blue: #2563eb;
+  --background: var(--ccd-bg);
 }
 
 @theme inline {
@@ -15,13 +17,15 @@
 }
 
 body {
-  background: radial-gradient(1200px 600px at 10% -10%, rgba(34, 211, 238, 0.12), transparent 55%),
-    radial-gradient(900px 500px at 90% 0%, rgba(37, 99, 235, 0.18), transparent 50%),
-    var(--background);
+  background:
+    radial-gradient(1000px 520px at 8% -8%, color-mix(in oklab, var(--ccd-orange) 18%, transparent), transparent 55%),
+    radial-gradient(900px 480px at 92% 0%, color-mix(in oklab, var(--ccd-violet) 22%, transparent), transparent 50%),
+    radial-gradient(800px 400px at 50% 100%, color-mix(in oklab, var(--ccd-navy) 25%, transparent), transparent 55%),
+    var(--ccd-bg);
   color: var(--foreground);
 }
 
 ::selection {
-  background: rgba(34, 211, 238, 0.35);
+  background: color-mix(in oklab, var(--ccd-orange) 35%, transparent);
   color: #0f172a;
 }

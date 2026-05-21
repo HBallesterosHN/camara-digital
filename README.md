@@ -1,12 +1,13 @@
 # Mapa Digital del Comité MIPYMES y Transformación Digital
 
-MVP web para la **Cámara de Comercio Digital de Honduras**: registro de miembros del comité, directorio público (sin correo ni WhatsApp), dashboard analítico y panel administrativo con PIN.
+MVP web para la **Cámara de Comercio Digital de Honduras**: registro de miembros del comité, directorio (sin correo ni WhatsApp en la vista pública), dashboard analítico y panel administrativo. El área interna exige **inicio de sesión con Google** (Auth.js / NextAuth); `/admin` mantiene además el **PIN** (`ADMIN_PIN`) en el flujo actual.
 
 ## Stack
 
 - Next.js (App Router) + TypeScript  
 - Tailwind CSS v4  
 - Prisma ORM + PostgreSQL  
+- **Auth.js (next-auth v5)** — proveedor Google, sesión JWT  
 
 ## Requisitos
 
@@ -32,14 +33,36 @@ Edite `.env` y defina al menos:
 | `DATABASE_URL`           | Cadena PostgreSQL (`postgresql://…`) o Prisma Accelerate (`prisma+postgres://…`). |
 | `DATABASE_URL_DIRECT`    | **Opcional.** URL `postgresql://…` al mismo origen. Solo se usa cuando `DATABASE_URL` comienza por `prisma+` (Accelerate): el cliente y el seed conectan por la URL directa. Si su `DATABASE_URL` ya es `postgresql://` (Neon estándar), **no** hace falta esta variable (y no la mezcle salvo que use Accelerate). |
 | `ADMIN_PIN`              | **Obligatorio** para `/admin` y las rutas `POST /api/admin/verify` y `GET /api/admin/members`. Si falta o está vacío, el servidor responde `503` con un mensaje explícito (no use PIN vacío en producción). |
+| `GOOGLE_CLIENT_ID`       | Credencial OAuth 2.0 de Google Cloud (tipo *Web application*). |
+| `GOOGLE_CLIENT_SECRET`   | Secreto del cliente OAuth de Google. |
+| `NEXTAUTH_SECRET`        | Secreto para firmar cookies de sesión (p. ej. `openssl rand -base64 32`). También puede usarse `AUTH_SECRET`. |
+| `NEXTAUTH_URL`           | URL canónica del sitio (p. ej. `http://localhost:3000` en local, `https://su-dominio.vercel.app` en producción). También puede usarse `AUTH_URL`. |
+
+## Autenticación (Google)
+
+- **Público:** solo `/` (inicio).  
+- **Privado (requiere sesión Google):** `/registro`, `/directorio`, `/dashboard`, `/admin`, y las APIs `GET/POST /api/members`, `GET /api/admin/members`, `POST /api/admin/verify`.  
+- Sin sesión, el middleware redirige a **`/login`** con `callbackUrl` para volver a la ruta solicitada tras autenticarse.  
+- **`/admin`:** además del login Google, el panel sigue pidiendo el **PIN** en cliente (`localStorage` + header `x-admin-pin`) como antes.
+
+### Google Cloud Console
+
+1. Cree un proyecto o use uno existente → **APIs y servicios** → **Credenciales** → **Crear credenciales** → **ID de cliente de OAuth**.  
+2. Tipo de aplicación: **Aplicación web**.  
+3. **URI de redireccionamiento autorizados:** `https://<NEXTAUTH_URL>/api/auth/callback/google` (sin barra final en `NEXTAUTH_URL`; en local: `http://localhost:3000/api/auth/callback/google`).  
+4. Copie **ID de cliente** y **Secreto del cliente** a `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`.
+
+Opcional: restrinja el acceso en la pantalla de consentimiento a usuarios de su dominio (Workspace) cuando pase a producción.
 
 ## Checklist de flujo (QA)
 
-1. **Inicio** (`/`): hero, CTAs a registro y directorio, secciones de fases y beneficios.  
-2. **Registro** (`/registro`): validación en cliente; al enviar, `POST /api/members` persiste en PostgreSQL.  
-3. **Directorio** (`/directorio`): datos desde Prisma en el servidor; filtros en cliente; contador de resultados.  
-4. **Dashboard** (`/dashboard`): métricas y barras con los mismos datos de la base.  
-5. **Admin** (`/admin`): PIN correcto → `localStorage` + lista vía `GET /api/admin/members` con header `x-admin-pin` (valor igual a `ADMIN_PIN` en el servidor, espacios ignorados al comparar).
+1. **Inicio** (`/`): público; hero y CTAs (al pulsar área privada sin sesión → `/login` y retorno con `callbackUrl`).  
+2. **Login** (`/login`): “Continuar con Google”; tras éxito, redirección a `callbackUrl` o `/directorio`.  
+3. **Registro** (`/registro`): requiere Google; validación en cliente; `POST /api/members` con cookie de sesión.  
+4. **Directorio** (`/directorio`): requiere Google; datos desde Prisma en el servidor; filtros en cliente.  
+5. **Dashboard** (`/dashboard`): requiere Google; métricas desde la base.  
+6. **Admin** (`/admin`): requiere Google **y** PIN correcto → `localStorage` + `GET /api/admin/members` con header `x-admin-pin` (igual a `ADMIN_PIN` en el servidor).  
+7. **Cerrar sesión:** botón en el encabezado (desktop y móvil) → vuelve a `/`.
 
 ## Base de datos
 
@@ -103,7 +126,7 @@ El script `build` ejecuta `prisma generate` antes de `next build` para que el cl
 ## Despliegue en Vercel
 
 1. Cree un proyecto en [Vercel](https://vercel.com) apuntando a este repositorio.  
-2. En **Settings → Environment Variables**, agregue `DATABASE_URL` y `ADMIN_PIN` (y cualquier otra variable de `.env.example`).  
+2. En **Settings → Environment Variables**, agregue `DATABASE_URL`, `ADMIN_PIN`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXTAUTH_SECRET` y `NEXTAUTH_URL` (véase `.env.example`).  
 3. Use una base PostgreSQL compatible (por ejemplo **Vercel Postgres** o **Neon**).  
 4. En el primer despliegue o en una ejecución local contra la misma base, aplique migraciones:
 
@@ -119,26 +142,28 @@ El script `build` ejecuta `prisma generate` antes de `next build` para que el cl
 
 6. Vuelva a desplegar si cambia el esquema Prisma; el `postinstall` ejecuta `prisma generate` en Vercel.
 
-**Nota de seguridad:** el acceso `/admin` con PIN y `localStorage` es solo para prototipo. Para producción real se requiere autenticación robusta, roles y auditoría.
+**Nota de seguridad:** la sesión con Google protege el área del comité en este MVP. El PIN de `/admin` sigue siendo un segundo factor ligero; para producción real conviene roles, auditoría y almacenamiento seguro del PIN fuera del cliente.
 
 ## Rutas principales
 
-| Ruta            | Descripción                                      |
-|-----------------|--------------------------------------------------|
-| `/`             | Landing institucional.                           |
-| `/registro`     | Formulario completo y validación en cliente.   |
-| `/directorio`   | Cards filtrables (vista pública).                |
-| `/dashboard`    | Métricas y barras simples en Tailwind.           |
-| `/admin`        | Tabla con datos sensibles; PIN + `localStorage`. |
+| Ruta            | Descripción |
+|-----------------|-------------|
+| `/`             | Landing institucional (**pública**). |
+| `/login`        | Acceso con Google; redirige con `callbackUrl` si aplica. |
+| `/registro`     | Formulario y validación (**requiere Google**). |
+| `/directorio`   | Cards filtrables (**requiere Google**). |
+| `/dashboard`    | Métricas (**requiere Google**). |
+| `/admin`        | Tabla sensible (**Google + PIN** + `localStorage` para el PIN). |
 
 ## API
 
 | Método y ruta            | Uso |
 |--------------------------|-----|
-| `GET /api/members`       | Lista pública para integraciones (mismos campos que el directorio). |
-| `POST /api/members`      | Crea un miembro (validación en servidor). |
-| `POST /api/admin/verify` | Cuerpo `{ "pin": "..." }` — valida `ADMIN_PIN`. |
-| `GET /api/admin/members` | Lista completa; header `x-admin-pin` igual a `ADMIN_PIN`. |
+| `GET/POST …/api/auth/*`  | Auth.js (OAuth Google, sesión, cierre de sesión). |
+| `GET /api/members`       | Lista para directorio (**requiere sesión Google**). |
+| `POST /api/members`      | Crea un miembro (**requiere sesión Google**). |
+| `POST /api/admin/verify` | Cuerpo `{ "pin": "..." }` — valida `ADMIN_PIN` (**requiere sesión Google**). |
+| `GET /api/admin/members` | Lista completa; header `x-admin-pin` + sesión Google. |
 
 ## Licencia y uso
 

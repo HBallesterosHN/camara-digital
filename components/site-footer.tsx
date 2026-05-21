@@ -1,7 +1,7 @@
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-white/10 bg-[#050c18] text-slate-400">
-      <div className="border-b border-white/5 bg-[#060f1c] py-3 text-center">
+    <footer className="mt-auto border-t border-white/10 bg-[var(--ccd-bg)] text-slate-400">
+      <div className="border-b border-white/5 bg-slate-950/40 py-3 text-center">
         <p className="mx-auto max-w-4xl px-4 text-xs leading-relaxed text-slate-400 sm:text-sm">
           Prototipo funcional preparado como propuesta inicial para el Comité MIPYMES y Transformación Digital.
         </p>

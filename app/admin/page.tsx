@@ -10,8 +10,8 @@ export default function AdminPage() {
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-white">Panel administrativo</h1>
         <p className="mt-3 max-w-2xl text-slate-400">
-          Vista operativa para revisar registros completos (correo, WhatsApp y campos extendidos). Acceso protegido
-          por PIN de entorno en este MVP.
+          Vista operativa para revisar registros completos (correo, WhatsApp y campos extendidos). Requiere sesión con
+          Google y, además, el PIN de administrador definido en el entorno (doble control en este MVP).
         </p>
       </div>
       <AdminPanel />

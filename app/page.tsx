@@ -27,9 +27,9 @@ export default function HomePage() {
   return (
     <div>
       <section className="relative overflow-hidden border-b border-white/10">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.15),transparent_45%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_18%,rgba(234,88,12,0.22),transparent_42%)]" />
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24 lg:py-28">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200/90">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-200/90">
             Cámara de Comercio Digital de Honduras
           </p>
           <h1 className="mt-4 max-w-4xl text-balance text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
@@ -39,10 +39,14 @@ export default function HomePage() {
             Plataforma de apoyo a la coordinación del comité fundador: visibiliza capacidades, ubicación y formas de
             colaboración, con vistas listas para compartir con la Cámara de Comercio Digital de Honduras.
           </p>
+          <p className="mt-4 max-w-2xl text-sm text-slate-400">
+            Registro, directorio, panel ejecutivo y administración requieren <span className="text-slate-300">acceso con Google</span>{" "}
+            (cuenta autorizada). Use <span className="font-medium text-orange-200/90">Acceder</span> en la parte superior cuando esté listo para trabajar en el área del comité.
+          </p>
           <div className="mt-10 flex flex-wrap gap-3">
             <Link
               href="/registro"
-              className="inline-flex min-h-[44px] min-w-[160px] items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/25 transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 active:scale-[0.98]"
+              className="inline-flex min-h-[44px] min-w-[160px] items-center justify-center rounded-xl bg-gradient-to-r from-[#1e3a8a] via-[#5b21b6] to-[#c2410c] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-950/40 transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ccd-orange)] active:scale-[0.98]"
             >
               Registrar mi perfil
             </Link>
@@ -62,27 +66,27 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="border-b border-white/10 bg-gradient-to-b from-[#071229]/90 to-transparent py-14 sm:py-16">
+      <section className="border-b border-white/10 bg-gradient-to-b from-[var(--ccd-surface)]/90 to-transparent py-14 sm:py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200/80">Resumen para el comité</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-200/80">Resumen para el comité</p>
           <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl">Valor del prototipo en una sola lectura</h2>
           <div className="mt-10 grid gap-6 lg:grid-cols-3">
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-lg ring-1 ring-white/5">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-cyan-200/90">Problema que ordena</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-violet-200/90">Problema que ordena</h3>
               <p className="mt-3 text-sm leading-relaxed text-slate-300">
                 Reduce la dispersión de información en canales informales. Concentra quién participa, desde qué
                 territorio aporta y con qué capacidades técnicas, para decisiones de agenda y seguimiento institucional.
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-lg ring-1 ring-white/5">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-cyan-200/90">Utilidad para el comité</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-violet-200/90">Utilidad para el comité</h3>
               <p className="mt-3 text-sm leading-relaxed text-slate-300">
                 Sirve de insumo para comisiones de trabajo, convocatorias focalizadas e informes de capacidades frente a
                 aliados de la Cámara de Comercio Digital de Honduras, con un lenguaje común y criterios comparables.
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-lg ring-1 ring-white/5">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-cyan-200/90">Escalabilidad prevista</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-violet-200/90">Escalabilidad prevista</h3>
               <p className="mt-3 text-sm leading-relaxed text-slate-300">
                 La misma estructura puede alimentar programas de acompañamiento a MIPYMES, convocatorias regionales y
                 tableros de seguimiento, incorporando autenticación, roles y conectores cuando el comité lo autorice.
@@ -104,7 +108,7 @@ export default function HomePage() {
             </p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-xl shadow-black/30">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-cyan-200/90">Enfoque por fases</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-violet-200/90">Enfoque por fases</h3>
             <div className="mt-4 space-y-5">
               <div>
                 <p className="text-sm font-semibold text-white">Fase 1: Organización interna del comité</p>
@@ -126,14 +130,14 @@ export default function HomePage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6 lg:pb-20">
-        <div className="rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/[0.07] via-[#071229] to-blue-900/20 p-6 shadow-xl sm:p-10">
+        <div className="rounded-3xl border border-[var(--ccd-orange)]/25 bg-gradient-to-br from-violet-950/40 via-[var(--ccd-surface)] to-slate-950/80 p-6 shadow-xl sm:p-10">
           <h2 className="text-xl font-bold text-white sm:text-2xl">Próximos pasos sugeridos</h2>
           <p className="mt-2 max-w-2xl text-sm text-slate-400">
             Secuencia orientativa para una primera sesión de coordinación con el comité fundador.
           </p>
           <ol className="mt-8 space-y-4 text-sm leading-relaxed text-slate-200">
             <li className="flex gap-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-xs font-bold text-cyan-200">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-xs font-bold text-violet-200">
                 1
               </span>
               <span>
@@ -142,7 +146,7 @@ export default function HomePage() {
               </span>
             </li>
             <li className="flex gap-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-xs font-bold text-cyan-200">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-xs font-bold text-violet-200">
                 2
               </span>
               <span>
@@ -151,7 +155,7 @@ export default function HomePage() {
               </span>
             </li>
             <li className="flex gap-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-xs font-bold text-cyan-200">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-xs font-bold text-violet-200">
                 3
               </span>
               <span>
@@ -160,7 +164,7 @@ export default function HomePage() {
               </span>
             </li>
             <li className="flex gap-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-xs font-bold text-cyan-200">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-xs font-bold text-violet-200">
                 4
               </span>
               <span>
@@ -169,7 +173,7 @@ export default function HomePage() {
               </span>
             </li>
             <li className="flex gap-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-xs font-bold text-cyan-200">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-xs font-bold text-violet-200">
                 5
               </span>
               <span>
@@ -195,7 +199,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-white/10 bg-[#071229]/60 py-14 sm:py-16">
+      <section className="border-y border-white/10 bg-[var(--ccd-surface)]/55 py-14 sm:py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-center text-2xl font-semibold text-white">Beneficios clave</h2>
           <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-slate-400">
@@ -205,7 +209,7 @@ export default function HomePage() {
             {benefits.map((b) => (
               <div
                 key={b.title}
-                className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent p-5 shadow-lg shadow-black/25 transition hover:border-cyan-400/25"
+                className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent p-5 shadow-lg shadow-black/25 transition hover:border-orange-400/25"
               >
                 <h3 className="text-lg font-semibold text-white">{b.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-400">{b.text}</p>
