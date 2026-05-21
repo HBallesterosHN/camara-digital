@@ -7,18 +7,31 @@ type BrandMarkProps = {
   className?: string;
 };
 
+/** Archivos reconocidos en `public/` (el primero que exista se usa). */
+const LOGO_CANDIDATES = ["logo-camara.png", "logo.jpg", "logo.jpeg", "logo.png", "ccd-logo.png"] as const;
+
+function resolvePublicLogo(): string | null {
+  const publicDir = path.join(process.cwd(), "public");
+  for (const name of LOGO_CANDIDATES) {
+    const abs = path.join(publicDir, name);
+    if (fs.existsSync(abs)) {
+      return `/${name}`;
+    }
+  }
+  return null;
+}
+
 /**
- * Marca visual CCD: usa `/logo-camara.png` si existe en `public/`; si no, marca SVG institucional.
+ * Marca visual CCD: usa un logo en `public/` (`logo.jpg`, `logo-camara.png`, etc.) si existe; si no, marca SVG institucional.
  */
 export function BrandMark({ className = "" }: BrandMarkProps) {
-  const logoPath = path.join(process.cwd(), "public", "logo-camara.png");
-  const hasLogo = fs.existsSync(logoPath);
+  const logoSrc = resolvePublicLogo();
 
-  if (hasLogo) {
+  if (logoSrc) {
     return (
       <span className={`relative block h-9 w-9 shrink-0 overflow-hidden rounded-xl ring-1 ring-white/15 ${className}`}>
         <Image
-          src="/logo-camara.png"
+          src={logoSrc}
           alt="Cámara de Comercio Digital de Honduras"
           width={36}
           height={36}
