@@ -37,13 +37,6 @@ export function validateMemberProfileFormState(
   }
   if (form.expertiseAreas.length === 0) e.expertiseAreas = "Seleccione al menos un área.";
   if (form.contributionTypes.length === 0) e.contributionTypes = "Seleccione al menos un tipo de aporte.";
-  if (form.professionalSummary.trim().length < 20) e.professionalSummary = "Mínimo 20 caracteres.";
-  if (form.committeeContribution.trim().length < 20) {
-    e.committeeContribution = "Indique al menos 20 caracteres sobre las formas de aporte.";
-  }
-  if (form.committeeExpectation.trim().length < 10) {
-    e.committeeExpectation = "Indique al menos 10 caracteres sobre la expectativa.";
-  }
   if (!form.consent) e.consent = "Debe marcar la autorización conforme al aviso de consentimiento.";
 
   if (form.linkedin.trim()) {

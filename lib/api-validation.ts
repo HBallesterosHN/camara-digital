@@ -24,8 +24,11 @@ export type CreateMemberBody = {
   website?: string | null;
   expertiseAreas: string[];
   contributionTypes: string[];
+  /** Opcional; puede quedar vacío. */
   professionalSummary: string;
+  /** Opcional; puede quedar vacío. */
   committeeContribution: string;
+  /** Opcional; puede quedar vacío. */
   committeeExpectation: string;
   consent: boolean;
 };
@@ -96,15 +99,6 @@ export function validateCreateMemberBody(
   }
   if (contributionTypes.length === 0) {
     return { ok: false, error: "Seleccione al menos un tipo de aporte." };
-  }
-  if (!professionalSummary || professionalSummary.length < 20) {
-    return { ok: false, error: "La descripción profesional debe tener al menos 20 caracteres." };
-  }
-  if (!committeeContribution || committeeContribution.length < 20) {
-    return { ok: false, error: "Describa las formas de aporte al comité en al menos 20 caracteres." };
-  }
-  if (!committeeExpectation || committeeExpectation.length < 10) {
-    return { ok: false, error: "Indique la expectativa respecto del trabajo del comité (mínimo 10 caracteres)." };
   }
   if (!consent) {
     return { ok: false, error: "Debe marcar la autorización para el uso interno de la información conforme al aviso de consentimiento." };

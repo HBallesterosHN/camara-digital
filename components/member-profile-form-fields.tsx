@@ -171,32 +171,41 @@ export function MemberProfileFormFields({ form, setForm, errors, lockedEmail }: 
       <section className="space-y-6 rounded-2xl border border-white/10 bg-white/[0.03] p-6">
         <h2 className="text-lg font-semibold text-white">Perfil y expectativas</h2>
         <label className="block text-sm">
-          <span className="font-medium text-slate-200">Breve descripción profesional *</span>
+          <span className="font-medium text-slate-200">
+            Breve descripción profesional <span className="font-normal text-slate-500">(opcional)</span>
+          </span>
           <textarea
             rows={4}
             className={fieldClass}
             value={form.professionalSummary}
             onChange={(e) => setForm((f) => ({ ...f, professionalSummary: e.target.value }))}
+            placeholder="Resumen corto de experiencia profesional, empresa o áreas de trabajo."
           />
           {errors.professionalSummary && <p className="mt-1 text-xs text-red-300">{errors.professionalSummary}</p>}
         </label>
         <label className="block text-sm">
-          <span className="font-medium text-slate-200">Formas de aporte al comité (autorreportado) *</span>
+          <span className="font-medium text-slate-200">
+            Formas de aporte al comité (autorreportado) <span className="font-normal text-slate-500">(opcional)</span>
+          </span>
           <textarea
             rows={4}
             className={fieldClass}
             value={form.committeeContribution}
             onChange={(e) => setForm((f) => ({ ...f, committeeContribution: e.target.value }))}
+            placeholder="Ejemplo: mentorías, networking, automatización, capacitaciones o apoyo tecnológico."
           />
           {errors.committeeContribution && <p className="mt-1 text-xs text-red-300">{errors.committeeContribution}</p>}
         </label>
         <label className="block text-sm">
-          <span className="font-medium text-slate-200">Expectativa respecto del trabajo del comité *</span>
+          <span className="font-medium text-slate-200">
+            Expectativa respecto del trabajo del comité <span className="font-normal text-slate-500">(opcional)</span>
+          </span>
           <textarea
             rows={3}
             className={fieldClass}
             value={form.committeeExpectation}
             onChange={(e) => setForm((f) => ({ ...f, committeeExpectation: e.target.value }))}
+            placeholder="Ejemplo: generar alianzas, impulsar transformación digital o colaborar con otras empresas."
           />
           {errors.committeeExpectation && <p className="mt-1 text-xs text-red-300">{errors.committeeExpectation}</p>}
         </label>
@@ -209,7 +218,8 @@ export function MemberProfileFormFields({ form, setForm, errors, lockedEmail }: 
           />
           <span>
             Autorizo el uso interno de la información suministrada por el comité, con fines de organización, articulación
-            entre miembros y colaboración institucional, conforme a lo acordado por la coordinación.
+            entre miembros y colaboración institucional, conforme a lo acordado por la coordinación.{" "}
+            <span className="text-amber-200/90">*</span>
           </span>
         </label>
         {errors.consent && <p className="text-xs text-red-300">{errors.consent}</p>}

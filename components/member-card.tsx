@@ -88,7 +88,11 @@ export function MemberCard({ member }: { member: PublicMember }) {
           ))}
         </div>
         <p className="min-w-0 border-t border-white/5 pt-2 text-sm leading-relaxed text-slate-300">
-          {shorten(member.professionalSummary, 220)}
+          {member.professionalSummary.trim() ? (
+            shorten(member.professionalSummary, 220)
+          ) : (
+            <span className="italic text-slate-500">Sin descripción breve.</span>
+          )}
         </p>
         {(member.linkedin || member.website) && (
           <div className="mt-auto flex flex-wrap gap-3 border-t border-white/10 pt-3 text-sm">

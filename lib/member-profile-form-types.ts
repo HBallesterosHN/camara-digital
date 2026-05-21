@@ -11,8 +11,11 @@ export type MemberProfileFormState = {
   website: string;
   expertiseAreas: string[];
   contributionTypes: string[];
+  /** Texto largo opcional. */
   professionalSummary: string;
+  /** Texto largo opcional. */
   committeeContribution: string;
+  /** Texto largo opcional. */
   committeeExpectation: string;
   consent: boolean;
 };
